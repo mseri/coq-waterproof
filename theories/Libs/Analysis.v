@@ -16,6 +16,7 @@
 (*                                                                            *)
 (******************************************************************************)
 
+Require Export Libs.Analysis.Compactness.
 Require Export Libs.Analysis.ContinuityDomainR.
 Require Export Libs.Analysis.LimsupLiminfBolzano.
 Require Export Libs.Analysis.MetricSpaces.
@@ -28,3 +29,4 @@ Require Export Libs.Analysis.SubsequencesMetric.
 Require Export Libs.Analysis.StrongInductionIndexSequence.
 Require Export Libs.Analysis.Subsequences.
 Require Export Libs.Analysis.SupAndInf.
+Require Export Libs.Analysis.UniformConvergence.
