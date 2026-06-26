@@ -22,16 +22,16 @@ From Stdlib Require Import Classical.
 From Stdlib Require Import Classical_Pred_Type.
 From Stdlib Require Import Lra.
 
-Require Import Tactics.
-Require Import Automation.
-Require Import Notations.Common.
-Require Import Notations.Reals.
-Require Import Notations.Sets.
-Require Import Chains.
-Require Import Libs.Analysis.SupAndInf.
-Require Import Libs.Analysis.OpenAndClosed.
-Require Import Libs.Analysis.LimsupLiminfBolzano.
-Require Import Libs.Analysis.Subsequences.
+From Waterproof Require Import Tactics.
+From Waterproof Require Import Automation.
+From Waterproof Require Import Notations.Common.
+From Waterproof Require Import Notations.Reals.
+From Waterproof Require Import Notations.Sets.
+From Waterproof Require Import Chains.
+From Waterproof Require Import Libs.Analysis.SupAndInf.
+From Waterproof Require Import Libs.Analysis.OpenAndClosed.
+From Waterproof Require Import Libs.Analysis.LimsupLiminfBolzano.
+From Waterproof Require Import Libs.Analysis.Subsequences.
 
 Waterproof Enable Automation RealsAndIntegers.
 Waterproof Enable Automation Intuition.
