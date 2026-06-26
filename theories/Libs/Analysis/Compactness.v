@@ -41,7 +41,7 @@ Open Scope subset_scope.
 
 (** * Limit points of sets
 
-A point x is a limit point (accumulation point) of A if every open ball
+A point x is a limit point (or accumulation point) of A if every open ball
 around x contains a point of A different from x.
 *)
 
@@ -58,28 +58,62 @@ Waterproof Register Expand "limit" "point";
   for is_limit_point_of;
   as "Definition limit point".
 
-(** * Compactness (Stdlib API)
+(** * Compactness
 
-We use the Stdlib's notion of compactness: every open cover has a finite subcover.
-See [Reals.Rtopology] in the Stdlib for the full definition and API.
+We rely on rocq Stdlib's notion of compactness: every open cover has a finite subcover.
+See [Reals.Rtopology] in the Stdlib for the full definition and available theorems.
 
-Key facts available from the Stdlib (usable in proofs):
+Key facts available from the Stdlib and usable in proofs are:
   - [compact_P3]: the closed interval [a,b] is compact.
   - [compact_P5]: closed + bounded implies compact.
   - [compact_P2]: compact implies closed.
   - [compact_P1]: compact implies bounded.
 *)
 
+(* NOTE: maybe better to move this whole file into Reals,
+   but I had some circular dependency issues when I tried. *)
+
+Notation "A 'is' '_bounded_'" := (bounded A) (at level 69).
+Notation "A 'is' 'bounded'" := (bounded A) (at level 69, only parsing).
+
 Definition is_compact (A : subset ℝ) : Prop := compact A.
 
 Notation "A 'is' '_compact_'" := (is_compact A) (at level 69).
 Notation "A 'is' 'compact'" := (is_compact A) (at level 69, only parsing).
 
-(** Heine-Borel: [a, b] is compact. *)
-Lemma segment_is_compact (a b : ℝ) :
-    is_compact (fun x => (a <= x /\ x <= b)).
+(** [a, b] is compact. *)
+Lemma closed_interval_is_compact (a b : ℝ) :
+    [a, b] is compact.
 Proof.
-  unfold is_compact. apply compact_P3.
+  apply compact_P3.
+Qed.
+
+(* TODO: I need to replace "close_set" by "is closed" in the
+   next two lemmas, but it breaks in a weird way if I do. *)
+
+(** Closed and bounded subsets of [ℝ] are compact. *)
+Lemma closed_and_bounded_is_compact (A : subset ℝ) :
+    closed_set A ->
+    A is bounded ->
+    A is compact.
+Proof.
+  apply compact_P5.
+Qed.
+
+(** Compact subsets of [ℝ] are closed. *)
+Lemma compact_is_closed (A : subset ℝ) :
+    A is compact ->
+    closed_set A.
+Proof.
+  apply compact_P2.
+Qed.
+
+(** Compact subsets of [ℝ] are bounded. *)
+Lemma compact_is_bounded (A : subset ℝ) :
+    A is compact ->
+    A is bounded.
+Proof.
+  apply compact_P1.
 Qed.
 
 (** * Bounded injective sequences and limit points
@@ -90,8 +124,8 @@ Every bounded infinite set has a limit point (Bolzano-Weierstrass route).
 (** A sequence (a_n) gives infinitely many distinct points in A if it is
     injective and contained in A. *)
 Definition inj_seq_in (A : subset ℝ) (a : ℕ → ℝ) : Prop :=
-  (forall n : ℕ, a n ∈ A) /\
-  (forall n m : ℕ, (n <> m)%nat -> a n <> a m).
+  (forall n : ℕ, a n ∈ A) ∧
+  (forall n m : ℕ, (n ≠ m)%nat -> a n ≠ a m).
 
 (** If (a_n) is a bounded injective sequence in A, then A has a limit point.
 
@@ -102,10 +136,12 @@ Definition inj_seq_in (A : subset ℝ) (a : ℕ → ℝ) : Prop :=
 Theorem inj_bounded_seq_has_limit_point
     (A : subset ℝ) (a : ℕ → ℝ) :
   inj_seq_in A a →
+  (* We cannot write a is bounded since it conflicts with bounded sets here *)
   has_ub a →
   has_lb a →
   ∃ x ∈ ℝ, x is a _limit point_ of A.
 Proof.
+  (* TODO: rewrite using waterproof syntax *)
   intros [Ha_A Ha_inj] Hub Hlb.
   assert (has_ub a ⇒ (has_lb a ⇒
     ∃ (phi : ℕ → ℕ), ∃ (x : ℝ), is_index_seq phi ∧
