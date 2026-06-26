@@ -59,6 +59,10 @@ Definition converges_uniformly
 
 (** ** Notations *)
 
+(* Note that this will raise a warning since the definitions share the
+   _converges prefactor. Scoping should make sure that this never 
+   results in an error though. *)
+
 Notation "fn '_converges' 'pointwise' 'on_' A 'to' g" :=
   (converges_pointwise fn g A) (at level 69).
 
@@ -94,11 +98,12 @@ Proof.
   By Hunif it holds that
     ∃ N1 ∈ ℕ, ∀ n : ℕ, (n ≥ N1)%nat → ∀ y ∈ A, | fn n y - g y | < ε as (HN).
   Obtain such an N1.
+  We need to show that ∃ N2 ∈ ℕ, ∀ n ≥ N2, |fn(n, x) - g(x)| < ε.
   Choose N2 := N1.
   * Indeed, N2 ∈ ℕ.
   * We need to show that ∀ n ≥ N2, | fn n x - g x | < ε.
     Take n ≥ N2.
-    It holds that ∀ y ∈ A, | fn n y - g y | < ε.
+    By HN it holds that ∀ y ∈ A, | fn n y - g y | < ε.
     We conclude that | fn n x - g x | < ε.
 Qed.
 
@@ -116,6 +121,8 @@ Proof.
   By Hunif it holds that
     ∃ N1 ∈ ℕ, ∀ n : ℕ, (n ≥ N1)%nat → ∀ x ∈ A, | fn n x - g x | < ε / 2 as (HN).
   Obtain such an N1.
+  We need to show ∃ N2 ∈ ℕ, ∀ n : ℕ, ∀ m : ℕ, (n ≥ N2)%nat → (m ≥ N2)%nat →
+    ∀ x ∈ A, | fn n x - fn m x | < ε.
   Choose N2 := N1.
   * Indeed, N2 ∈ ℕ.
   * We need to show that ∀ n : ℕ, ∀ m : ℕ, (n ≥ N2)%nat → (m ≥ N2)%nat →
@@ -123,8 +130,8 @@ Proof.
     Take n : ℕ. Take m : ℕ.
     Assume that (n ≥ N2)%nat as (Hn) and (m ≥ N2)%nat as (Hm).
     Take x ∈ A.
-    It holds that | fn n x - g x | < ε / 2 as (H1).
-    It holds that | fn m x - g x | < ε / 2 as (H2).
+    By HN it holds that | fn n x - g x | < ε / 2.
+    By HN it holds that | fn m x - g x | < ε / 2.
     We conclude that & | fn n x - fn m x |
                      = | (fn n x - g x) - (fn m x - g x) |
                      ≤ | fn n x - g x | + | fn m x - g x |
@@ -132,7 +139,7 @@ Proof.
                      = ε.
 Qed.
 
-(** Useful helper: if there is an upper bound $b_n \to 0$ on $|f_n(x) - g(x)|$
+(** If there is an upper bound $b_n \to 0$ on $|f_n(x) - g(x)|$
     that is independent of $x$, then $f_n$ converges uniformly to $g$ on $A$. *)
 Lemma unif_conv_from_bound
     (fn : ℕ → ℝ → ℝ) (g : ℝ → ℝ) (A : subset ℝ) (b : ℕ → ℝ) :
@@ -148,6 +155,8 @@ Proof.
   By Hb0 it holds that
     ∃ N1 ∈ ℕ, ∀ n ≥ N1, | b n - 0 | < ε as (HN).
   Obtain such an N1.
+  We need to show ∃ N2 ∈ ℕ, ∀ n : ℕ, (n ≥ N2)%nat →
+    ∀ x ∈ A, | fn n x - g x | < ε.
   Choose N2 := N1.
   * Indeed, N2 ∈ ℕ.
   * We need to show that ∀ n : ℕ, (n ≥ N2)%nat → ∀ x ∈ A, | fn n x - g x | < ε.
@@ -155,6 +164,19 @@ Proof.
     Take x ∈ A.
     It holds that | fn n x - g x | ≤ b n as (Hbnd).
     It holds that | b n - 0 | < ε as (Hb_eps).
+    (* Here I would like to write
+       We conclude that & | fn n x - g x |
+                        ≤ b n
+                        = | b n - 0 |
+                        < ε. 
+       However the intermediate step does not seem to be accepted cleanly.
+       The codes below are the manual way to do it:
+       - the first line uses transitivity of ≤ to replace proving
+         |fn(n, x) - g(x)| < ε with proving |fn(n, x) - g(x)| < ε
+       - the second line uses the definition of absolute value to replace proving
+         |b(n) - 0| < ε with proving |b(n)| < ε
+       - the third line uses the fact that |b(n)| = b(n) since b(n) is non-negative
+       - finally we apply this to conclude the proof. *)
     apply (Rle_lt_trans _ (b n) _ Hbnd).
     rewrite Rminus_0_r in Hb_eps.
     apply Rabs_def2 in Hb_eps.
